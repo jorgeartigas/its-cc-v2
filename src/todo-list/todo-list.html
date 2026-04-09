@@ -1,5 +1,12 @@
 <div class="p-4 flex flex-col items-center border bg-white w-full rounded">
-  <h2 class="mb-4">{{ todoStore.pendingTasksCount() }} things I have to do:</h2>
+  <h2
+    id="todoSummary"
+    class="mb-4"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    {{ todoStore.pendingTasksCount() }} things I have to do:
+  </h2>
 
   <app-todo-form [taskForm]="taskForm" (submitted)="submitTask()" />
 
@@ -8,7 +15,11 @@
     (filterSelected)="todoStore.setFilter($event)"
   />
 
-  <ul class="flex w-full flex-col justify-center gap-4 p-2" id="todoList">
+  <ul
+    class="flex w-full flex-col justify-center gap-4 p-2"
+    id="todoList"
+    aria-labelledby="todoSummary"
+  >
     @for (task of todoStore.visibleTasks(); track task.id) {
       <li
         app-todo-item

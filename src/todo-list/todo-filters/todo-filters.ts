@@ -5,13 +5,18 @@ import { TodoFilter } from '../todo.store';
   selector: 'app-todo-filters',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="mb-4 flex gap-2">
+    <div
+      class="mb-4 flex gap-2"
+      role="group"
+      aria-label="Filter tasks by status"
+    >
       <button
         type="button"
         data-filter="all"
         class="rounded border px-3 py-1"
         [class.bg-slate-200]="currentFilter() === 'all'"
         [attr.aria-pressed]="currentFilter() === 'all'"
+        aria-controls="todoList"
         (click)="selectFilter('all')"
       >
         All
@@ -22,6 +27,7 @@ import { TodoFilter } from '../todo.store';
         class="rounded border px-3 py-1"
         [class.bg-slate-200]="currentFilter() === 'completed'"
         [attr.aria-pressed]="currentFilter() === 'completed'"
+        aria-controls="todoList"
         (click)="selectFilter('completed')"
       >
         Completed
@@ -32,6 +38,7 @@ import { TodoFilter } from '../todo.store';
         class="rounded border px-3 py-1"
         [class.bg-slate-200]="currentFilter() === 'incomplete'"
         [attr.aria-pressed]="currentFilter() === 'incomplete'"
+        aria-controls="todoList"
         (click)="selectFilter('incomplete')"
       >
         Incomplete
