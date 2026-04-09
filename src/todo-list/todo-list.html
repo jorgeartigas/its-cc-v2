@@ -1,170 +1,99 @@
 <div class="p-4 flex flex-col items-center border bg-white w-full rounded">
-  <h2 class="mb-4">{{ count() }} things I have to do:</h2>
+  <h2 class="mb-4">{{ todoStore.pendingTasksCount() }} things I have to do:</h2>
 
-  <ul class="flex flex-col justify-center gap-4 p-2" id="todoList">
-    <li class="flex gap-4">
-      <label for="task1Checkbox" class="hover:cursor-pointer"
-        >Do the dishes</label
-      >
-      <button
-        class="hover:cursor-pointer"
-        (click)="toggleClass($event, 'fill-red-500')"
-      >
-        <svg
-          version="1.1"
-          id="Capa_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          width="24px"
-          height="24px"
-          viewBox="-4.53 -4.53 54.37 54.37"
-          xml:space="preserve"
-          transform="rotate(0)"
+  <form
+    class="mb-4 flex w-full flex-col gap-2"
+    [formGroup]="taskForm"
+    (submit)="submitTask()"
+  >
+    <label for="todoTitle" class="text-sm font-medium">Task title</label>
+    <input
+      id="todoTitle"
+      type="text"
+      class="rounded border p-2"
+      formControlName="title"
+    />
+
+    <label for="todoPriority" class="text-sm font-medium">Priority</label>
+    <select
+      id="todoPriority"
+      class="rounded border p-2"
+      formControlName="priority"
+    >
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+
+    <button
+      type="submit"
+      class="rounded border bg-slate-100 p-2 hover:bg-slate-200 disabled:cursor-not-allowed disabled:bg-slate-50"
+      [disabled]="taskForm.invalid"
+    >
+      Add task
+    </button>
+  </form>
+
+  <div class="mb-4 flex gap-2">
+    <button
+      type="button"
+      data-filter="all"
+      class="rounded border px-3 py-1"
+      [class.bg-slate-200]="todoStore.currentFilter() === 'all'"
+      (click)="todoStore.setFilter('all')"
+    >
+      All
+    </button>
+    <button
+      type="button"
+      data-filter="completed"
+      class="rounded border px-3 py-1"
+      [class.bg-slate-200]="todoStore.currentFilter() === 'completed'"
+      (click)="todoStore.setFilter('completed')"
+    >
+      Completed
+    </button>
+    <button
+      type="button"
+      data-filter="incomplete"
+      class="rounded border px-3 py-1"
+      [class.bg-slate-200]="todoStore.currentFilter() === 'incomplete'"
+      (click)="todoStore.setFilter('incomplete')"
+    >
+      Incomplete
+    </button>
+  </div>
+
+  <ul class="flex w-full flex-col justify-center gap-4 p-2" id="todoList">
+    @for (task of todoStore.visibleTasks(); track task.id) {
+      <li class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <input
+            type="checkbox"
+            class="hover:cursor-pointer"
+            [id]="'task-' + task.id"
+            [checked]="task.completed"
+            (change)="todoStore.toggleTask(task.id)"
+          />
+          <label
+            [for]="'task-' + task.id"
+            class="hover:cursor-pointer"
+            [class.line-through]="task.completed"
+          >
+            {{ task.title }} ({{ priorityLabels[task.priority] }})
+          </label>
+        </div>
+
+        <button
+          type="button"
+          class="rounded border px-2 py-1 hover:bg-slate-100"
+          (click)="todoStore.deleteTask(task.id)"
         >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <g>
-              <path
-                d="M22.675,0.02c-0.006,0-0.014,0.001-0.02,0.001c-0.007,0-0.013-0.001-0.02-0.001C10.135,0.02,0,10.154,0,22.656 c0,12.5,10.135,22.635,22.635,22.635c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0c12.5,0,22.635-10.135,22.635-22.635 C45.311,10.154,35.176,0.02,22.675,0.02z M22.675,38.811c-0.006,0-0.014-0.001-0.02-0.001c-0.007,0-0.013,0.001-0.02,0.001 c-2.046,0-3.705-1.658-3.705-3.705c0-2.045,1.659-3.703,3.705-3.703c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0 c2.045,0,3.706,1.658,3.706,3.703C26.381,37.152,24.723,38.811,22.675,38.811z M27.988,10.578 c-0.242,3.697-1.932,14.692-1.932,14.692c0,1.854-1.519,3.356-3.373,3.356c-0.01,0-0.02,0-0.029,0c-0.009,0-0.02,0-0.029,0 c-1.853,0-3.372-1.504-3.372-3.356c0,0-1.689-10.995-1.931-14.692C17.202,8.727,18.62,5.29,22.626,5.29 c0.01,0,0.02,0.001,0.029,0.001c0.009,0,0.019-0.001,0.029-0.001C26.689,5.29,28.109,8.727,27.988,10.578z"
-              ></path>
-            </g>
-          </g>
-        </svg>
-      </button>
-      <input
-        type="checkbox"
-        name="task1Checkbox"
-        id="task1Checkbox"
-        class="hover:cursor-pointer"
-      />
-    </li>
-    <li class="flex gap-4">
-      <label for="task1Checkbox" class="hover:cursor-pointer"
-        >Do the dishes</label
-      >
-      <button
-        class="hover:cursor-pointer"
-        (click)="toggleClass($event, 'fill-red-500')"
-      >
-        <svg
-          version="1.1"
-          id="Capa_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          width="24px"
-          height="24px"
-          viewBox="-4.53 -4.53 54.37 54.37"
-          xml:space="preserve"
-          transform="rotate(0)"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <g>
-              <path
-                d="M22.675,0.02c-0.006,0-0.014,0.001-0.02,0.001c-0.007,0-0.013-0.001-0.02-0.001C10.135,0.02,0,10.154,0,22.656 c0,12.5,10.135,22.635,22.635,22.635c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0c12.5,0,22.635-10.135,22.635-22.635 C45.311,10.154,35.176,0.02,22.675,0.02z M22.675,38.811c-0.006,0-0.014-0.001-0.02-0.001c-0.007,0-0.013,0.001-0.02,0.001 c-2.046,0-3.705-1.658-3.705-3.705c0-2.045,1.659-3.703,3.705-3.703c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0 c2.045,0,3.706,1.658,3.706,3.703C26.381,37.152,24.723,38.811,22.675,38.811z M27.988,10.578 c-0.242,3.697-1.932,14.692-1.932,14.692c0,1.854-1.519,3.356-3.373,3.356c-0.01,0-0.02,0-0.029,0c-0.009,0-0.02,0-0.029,0 c-1.853,0-3.372-1.504-3.372-3.356c0,0-1.689-10.995-1.931-14.692C17.202,8.727,18.62,5.29,22.626,5.29 c0.01,0,0.02,0.001,0.029,0.001c0.009,0,0.019-0.001,0.029-0.001C26.689,5.29,28.109,8.727,27.988,10.578z"
-              ></path>
-            </g>
-          </g>
-        </svg>
-      </button>
-      <input
-        type="checkbox"
-        name="task1Checkbox"
-        id="task1Checkbox"
-        class="hover:cursor-pointer"
-      />
-    </li>
-    <li class="flex gap-4">
-      <label for="task1Checkbox" class="hover:cursor-pointer"
-        >Do the dishes</label
-      >
-      <button
-        class="hover:cursor-pointer"
-        (click)="toggleClass($event, 'fill-red-500')"
-      >
-        <svg
-          version="1.1"
-          id="Capa_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          width="24px"
-          height="24px"
-          viewBox="-4.53 -4.53 54.37 54.37"
-          xml:space="preserve"
-          transform="rotate(0)"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <g>
-              <path
-                d="M22.675,0.02c-0.006,0-0.014,0.001-0.02,0.001c-0.007,0-0.013-0.001-0.02-0.001C10.135,0.02,0,10.154,0,22.656 c0,12.5,10.135,22.635,22.635,22.635c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0c12.5,0,22.635-10.135,22.635-22.635 C45.311,10.154,35.176,0.02,22.675,0.02z M22.675,38.811c-0.006,0-0.014-0.001-0.02-0.001c-0.007,0-0.013,0.001-0.02,0.001 c-2.046,0-3.705-1.658-3.705-3.705c0-2.045,1.659-3.703,3.705-3.703c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0 c2.045,0,3.706,1.658,3.706,3.703C26.381,37.152,24.723,38.811,22.675,38.811z M27.988,10.578 c-0.242,3.697-1.932,14.692-1.932,14.692c0,1.854-1.519,3.356-3.373,3.356c-0.01,0-0.02,0-0.029,0c-0.009,0-0.02,0-0.029,0 c-1.853,0-3.372-1.504-3.372-3.356c0,0-1.689-10.995-1.931-14.692C17.202,8.727,18.62,5.29,22.626,5.29 c0.01,0,0.02,0.001,0.029,0.001c0.009,0,0.019-0.001,0.029-0.001C26.689,5.29,28.109,8.727,27.988,10.578z"
-              ></path>
-            </g>
-          </g>
-        </svg>
-      </button>
-      <input
-        type="checkbox"
-        name="task1Checkbox"
-        id="task1Checkbox"
-        class="hover:cursor-pointer"
-      />
-    </li>
-    <li class="flex gap-4">
-      <label for="task1Checkbox" class="hover:cursor-pointer"
-        >Do the dishes</label
-      >
-      <button
-        class="hover:cursor-pointer"
-        (click)="toggleClass($event, 'fill-red-500')"
-      >
-        <svg
-          version="1.1"
-          id="Capa_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          width="24px"
-          height="24px"
-          viewBox="-4.53 -4.53 54.37 54.37"
-          xml:space="preserve"
-          transform="rotate(0)"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <g>
-              <path
-                d="M22.675,0.02c-0.006,0-0.014,0.001-0.02,0.001c-0.007,0-0.013-0.001-0.02-0.001C10.135,0.02,0,10.154,0,22.656 c0,12.5,10.135,22.635,22.635,22.635c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0c12.5,0,22.635-10.135,22.635-22.635 C45.311,10.154,35.176,0.02,22.675,0.02z M22.675,38.811c-0.006,0-0.014-0.001-0.02-0.001c-0.007,0-0.013,0.001-0.02,0.001 c-2.046,0-3.705-1.658-3.705-3.705c0-2.045,1.659-3.703,3.705-3.703c0.007,0,0.013,0,0.02,0c0.006,0,0.014,0,0.02,0 c2.045,0,3.706,1.658,3.706,3.703C26.381,37.152,24.723,38.811,22.675,38.811z M27.988,10.578 c-0.242,3.697-1.932,14.692-1.932,14.692c0,1.854-1.519,3.356-3.373,3.356c-0.01,0-0.02,0-0.029,0c-0.009,0-0.02,0-0.029,0 c-1.853,0-3.372-1.504-3.372-3.356c0,0-1.689-10.995-1.931-14.692C17.202,8.727,18.62,5.29,22.626,5.29 c0.01,0,0.02,0.001,0.029,0.001c0.009,0,0.019-0.001,0.029-0.001C26.689,5.29,28.109,8.727,27.988,10.578z"
-              ></path>
-            </g>
-          </g>
-        </svg>
-      </button>
-      <input
-        type="checkbox"
-        name="task1Checkbox"
-        id="task1Checkbox"
-        class="hover:cursor-pointer"
-      />
-    </li>
+          Eliminar
+        </button>
+      </li>
+    } @empty {
+      <li class="text-sm text-slate-500">No tasks yet</li>
+    }
   </ul>
 </div>

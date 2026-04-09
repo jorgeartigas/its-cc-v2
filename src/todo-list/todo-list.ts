@@ -1,86 +1,37 @@
-import {  Component, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-type TodoPriority = 'high' | 'medium' | 'low';
-type TodoFilter = 'all' | 'completed' | 'incomplete';
-
-type TodoTask = {
-  id: number;
-  title: string;
-  priority: TodoPriority;
-  completed: boolean;
-};
-
-const PRIORITY_ORDER = {
-  high: 3,
-  medium: 2,
-  low: 1,
-};
-
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PRIORITY_LABELS, TodoPriority, TodoStore } from './todo.store';
 
 @Component({
   selector: 'app-todo-list',
-  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, ReactiveFormsModule],
+  providers: [TodoStore],
   templateUrl: './todo-list.html',
 })
 export class TodoListComponent  {
-  count = signal<number>(0)
-  tasks: TodoTask[] = [];
-  currentFilter: TodoFilter = 'all';
-  private nextId = 1;
+  private readonly formBuilder = inject(NonNullableFormBuilder);
+  readonly todoStore = inject(TodoStore);
+  readonly taskForm = this.formBuilder.group({
+    title: ['', [Validators.required]],
+    priority: ['medium' as TodoPriority],
+  });
+  readonly priorityLabels = PRIORITY_LABELS;
 
-  constructor() {
-    effect(() => {
-      this.count.set(document.querySelectorAll('#todoList>li').length)
-    })
-  }
-
-  toggleClass(ev: MouseEvent, className: string) {
-    const el = ev.currentTarget as HTMLElement;
-    el.classList.toggle(className);
-  }
-
-  addTask(title: string, priority: TodoPriority) {
-    const trimmedTitle = title.trim();
-
-    if (!trimmedTitle) {
+  submitTask() {
+    if (this.taskForm.invalid) {
+      this.taskForm.markAllAsTouched();
       return;
     }
 
-    this.tasks = [
-      ...this.tasks,
-      {
-        id: this.nextId++,
-        title: trimmedTitle,
-        priority,
-        completed: false,
-      },
-    ];
-  }
+    const { title, priority } = this.taskForm.getRawValue();
+    const wasAdded = this.todoStore.addTask(title, priority);
 
-  deleteTask(id: number) {
-    this.tasks = this.tasks.filter((task) => task.id !== id);
-  }
+    if (!wasAdded) {
+      return;
+    }
 
-  toggleTask(id: number) {
-    this.tasks = this.tasks.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    );
+    this.taskForm.reset();
   }
-
-  getFilteredAndSortedTasks(): TodoTask[] {
-    return this.tasks
-      .filter((task) => {
-        switch (this.currentFilter) {
-          case 'completed':
-            return task.completed;
-          case 'incomplete':
-            return !task.completed;
-          default:
-            return true;
-        }
-      })
-      .sort((left, right) => PRIORITY_ORDER[right.priority] - PRIORITY_ORDER[left.priority]);
-  }
-
 }

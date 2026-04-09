@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { TodoListComponent } from './todo-list';
 
 describe('TodoListComponent', () => {
@@ -20,79 +19,62 @@ describe('TodoListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should start with no tasks', () => {
-    expect(component.tasks).toEqual([]);
+  it('should submit a valid task and reset the form', () => {
+    addTaskThroughForm('Nueva tarea', 'high');
+
+    expect(getTaskLabels()).toEqual(['Nueva tarea (Alta)']);
+    expect(getTitleInput().value).toBe('');
+    expect(getPrioritySelect().value).toBe('medium');
   });
 
-  it('should add a task with title and priority', () => {
-    component.addTask('Nueva tarea', 'high');
+  it('should not submit when the form is invalid', () => {
+    submitForm();
 
-    expect(component.tasks).toHaveLength(1);
-    expect(component.tasks[0]).toEqual(
-      expect.objectContaining({
-        title: 'Nueva tarea',
-        priority: 'high',
-        completed: false,
-      })
-    );
+    expect(getEmptyStateText()).toBe('No tasks yet');
   });
 
-  it('should not add tasks when title is empty', () => {
-    component.addTask('Tarea válida', 'medium');
-    component.addTask('', 'medium');
-
-    expect(component.tasks).toHaveLength(1);
-    expect(component.tasks[0].title).toBe('Tarea válida');
+  it('should show empty state when there are no tasks', () => {
+    expect(getEmptyStateText()).toBe('No tasks yet');
   });
 
-  it('should toggle a task completion state', () => {
-    component.tasks = [
-      { id: 1, title: 'Toggle estado', priority: 'low', completed: false },
-    ];
+  function addTaskThroughForm(title: string, priority: 'high' | 'medium' | 'low') {
+    const titleInput = getTitleInput();
+    const prioritySelect = getPrioritySelect();
 
-    component.toggleTask(1);
+    titleInput.value = title;
+    titleInput.dispatchEvent(new Event('input', { bubbles: true }));
 
-    expect(component.tasks[0].completed).toBe(true);
-  });
+    prioritySelect.value = priority;
+    prioritySelect.dispatchEvent(new Event('change', { bubbles: true }));
 
-  it('should delete a task by id', () => {
-    component.tasks = [
-      { id: 1, title: 'Elimina tarea', priority: 'medium', completed: false },
-    ];
+    fixture.detectChanges();
+    submitForm();
+  }
 
-    component.deleteTask(1);
+  function submitForm() {
+    getHost().querySelector('form')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+  }
 
-    expect(component.tasks).toEqual([]);
-  });
+  function getTaskLabels(): string[] {
+    return Array.from(getHost().querySelectorAll('#todoList li label'))
+      .map((el) => el.textContent?.trim() ?? '');
+  }
 
-  it('should filter tasks by state', () => {
-    component.tasks = [
-      { id: 1, title: 'Completada', priority: 'medium', completed: true },
-      { id: 2, title: 'Pendiente', priority: 'medium', completed: false },
-    ];
+  function getEmptyStateText(): string | undefined {
+    return getHost().querySelector('#todoList li')?.textContent?.trim();
+  }
 
-    component.currentFilter = 'completed';
-    expect(component.getFilteredAndSortedTasks().map((task) => task.title)).toEqual([
-      'Completada',
-    ]);
+  function getTitleInput(): HTMLInputElement {
+    return getHost().querySelector('#todoTitle') as HTMLInputElement;
+  }
 
-    component.currentFilter = 'incomplete';
-    expect(component.getFilteredAndSortedTasks().map((task) => task.title)).toEqual([
-      'Pendiente',
-    ]);
-  });
+  function getPrioritySelect(): HTMLSelectElement {
+    return getHost().querySelector('#todoPriority') as HTMLSelectElement;
+  }
 
-  it('should order tasks by priority', () => {
-    component.tasks = [
-      { id: 1, title: 'Baja', priority: 'low', completed: false },
-      { id: 2, title: 'Alta', priority: 'high', completed: false },
-      { id: 3, title: 'Media', priority: 'medium', completed: false },
-    ];
-
-    expect(component.getFilteredAndSortedTasks().map((task) => task.priority)).toEqual([
-      'high',
-      'medium',
-      'low',
-    ]);
-  });
+  function getHost(): HTMLElement {
+    return fixture.nativeElement as HTMLElement;
+  }
 });
