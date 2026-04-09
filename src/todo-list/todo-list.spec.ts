@@ -20,27 +20,79 @@ describe('TodoListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should contain tasks', () => {
-    const todoListElement = document.querySelector('#todoList');
-
-    expect(todoListElement!.children.length).toBeGreaterThan(0);
+  it('should start with no tasks', () => {
+    expect(component.tasks).toEqual([]);
   });
 
-  it('should toggle test class when clicked', () => {
-    const todoTaskElement = document.querySelector('#todoList>li');
+  it('should add a task with title and priority', () => {
+    component.addTask('Nueva tarea', 'high');
 
-    component.toggleClass(
-      { currentTarget: todoTaskElement } as MouseEvent,
-      'test'
+    expect(component.tasks).toHaveLength(1);
+    expect(component.tasks[0]).toEqual(
+      expect.objectContaining({
+        title: 'Nueva tarea',
+        priority: 'high',
+        completed: false,
+      })
     );
+  });
 
-    expect(todoTaskElement!.className).toContain('test');
+  it('should not add tasks when title is empty', () => {
+    component.addTask('Tarea válida', 'medium');
+    component.addTask('', 'medium');
 
-    component.toggleClass(
-      { currentTarget: todoTaskElement } as MouseEvent,
-      'test'
-    );
+    expect(component.tasks).toHaveLength(1);
+    expect(component.tasks[0].title).toBe('Tarea válida');
+  });
 
-    expect(todoTaskElement!.className).not.toContain('test');
+  it('should toggle a task completion state', () => {
+    component.tasks = [
+      { id: '1', title: 'Toggle estado', priority: 'low', completed: false },
+    ];
+
+    component.toggleTask('1');
+
+    expect(component.tasks[0].completed).toBe(true);
+  });
+
+  it('should delete a task by id', () => {
+    component.tasks = [
+      { id: '1', title: 'Elimina tarea', priority: 'medium', completed: false },
+    ];
+
+    component.deleteTask('1');
+
+    expect(component.tasks).toEqual([]);
+  });
+
+  it('should filter tasks by state', () => {
+    component.tasks = [
+      { id: '1', title: 'Completada', priority: 'medium', completed: true },
+      { id: '2', title: 'Pendiente', priority: 'medium', completed: false },
+    ];
+
+    component.currentFilter = 'completed';
+    expect(component.getFilteredAndSortedTasks().map((task) => task.title)).toEqual([
+      'Completada',
+    ]);
+
+    component.currentFilter = 'incomplete';
+    expect(component.getFilteredAndSortedTasks().map((task) => task.title)).toEqual([
+      'Pendiente',
+    ]);
+  });
+
+  it('should order tasks by priority', () => {
+    component.tasks = [
+      { id: '1', title: 'Baja', priority: 'low', completed: false },
+      { id: '2', title: 'Alta', priority: 'high', completed: false },
+      { id: '3', title: 'Media', priority: 'medium', completed: false },
+    ];
+
+    expect(component.getFilteredAndSortedTasks().map((task) => task.priority)).toEqual([
+      'high',
+      'medium',
+      'low',
+    ]);
   });
 });
