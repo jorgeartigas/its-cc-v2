@@ -5,11 +5,18 @@ type TodoPriority = 'high' | 'medium' | 'low';
 type TodoFilter = 'all' | 'completed' | 'incomplete';
 
 type TodoTask = {
-  id: string;
+  id: number;
   title: string;
   priority: TodoPriority;
   completed: boolean;
 };
+
+const PRIORITY_ORDER = {
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
 
 @Component({
   selector: 'app-todo-list',
@@ -20,6 +27,7 @@ export class TodoListComponent  {
   count = signal<number>(0)
   tasks: TodoTask[] = [];
   currentFilter: TodoFilter = 'all';
+  private nextId = 1;
 
   constructor() {
     effect(() => {
@@ -32,14 +40,47 @@ export class TodoListComponent  {
     el.classList.toggle(className);
   }
 
-  addTask(title: string, priority: TodoPriority) {}
+  addTask(title: string, priority: TodoPriority) {
+    const trimmedTitle = title.trim();
 
-  deleteTask(id: string) {}
+    if (!trimmedTitle) {
+      return;
+    }
 
-  toggleTask(id: string) {}
+    this.tasks = [
+      ...this.tasks,
+      {
+        id: this.nextId++,
+        title: trimmedTitle,
+        priority,
+        completed: false,
+      },
+    ];
+  }
+
+  deleteTask(id: number) {
+    this.tasks = this.tasks.filter((task) => task.id !== id);
+  }
+
+  toggleTask(id: number) {
+    this.tasks = this.tasks.map((task) =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    );
+  }
 
   getFilteredAndSortedTasks(): TodoTask[] {
-    return [];
+    return this.tasks
+      .filter((task) => {
+        switch (this.currentFilter) {
+          case 'completed':
+            return task.completed;
+          case 'incomplete':
+            return !task.completed;
+          default:
+            return true;
+        }
+      })
+      .sort((left, right) => PRIORITY_ORDER[right.priority] - PRIORITY_ORDER[left.priority]);
   }
 
 }

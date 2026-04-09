@@ -47,28 +47,28 @@ describe('TodoListComponent', () => {
 
   it('should toggle a task completion state', () => {
     component.tasks = [
-      { id: '1', title: 'Toggle estado', priority: 'low', completed: false },
+      { id: 1, title: 'Toggle estado', priority: 'low', completed: false },
     ];
 
-    component.toggleTask('1');
+    component.toggleTask(1);
 
     expect(component.tasks[0].completed).toBe(true);
   });
 
   it('should delete a task by id', () => {
     component.tasks = [
-      { id: '1', title: 'Elimina tarea', priority: 'medium', completed: false },
+      { id: 1, title: 'Elimina tarea', priority: 'medium', completed: false },
     ];
 
-    component.deleteTask('1');
+    component.deleteTask(1);
 
     expect(component.tasks).toEqual([]);
   });
 
   it('should filter tasks by state', () => {
     component.tasks = [
-      { id: '1', title: 'Completada', priority: 'medium', completed: true },
-      { id: '2', title: 'Pendiente', priority: 'medium', completed: false },
+      { id: 1, title: 'Completada', priority: 'medium', completed: true },
+      { id: 2, title: 'Pendiente', priority: 'medium', completed: false },
     ];
 
     component.currentFilter = 'completed';
@@ -84,9 +84,9 @@ describe('TodoListComponent', () => {
 
   it('should order tasks by priority', () => {
     component.tasks = [
-      { id: '1', title: 'Baja', priority: 'low', completed: false },
-      { id: '2', title: 'Alta', priority: 'high', completed: false },
-      { id: '3', title: 'Media', priority: 'medium', completed: false },
+      { id: 1, title: 'Baja', priority: 'low', completed: false },
+      { id: 2, title: 'Alta', priority: 'high', completed: false },
+      { id: 3, title: 'Media', priority: 'medium', completed: false },
     ];
 
     expect(component.getFilteredAndSortedTasks().map((task) => task.priority)).toEqual([
