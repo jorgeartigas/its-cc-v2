@@ -1,12 +1,21 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PRIORITY_LABELS, TodoPriority, TodoStore } from './todo.store';
+import { TodoFiltersComponent } from './todo-filters/todo-filters';
+import { TodoFormComponent } from './todo-form/todo-form';
+import { TodoItemComponent } from './todo-item/todo-item';
+import { TodoPriority, TodoStore } from './todo.store';
 
 @Component({
   selector: 'app-todo-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TodoFormComponent,
+    TodoFiltersComponent,
+    TodoItemComponent,
+  ],
   providers: [TodoStore],
   templateUrl: './todo-list.html',
 })
@@ -17,7 +26,6 @@ export class TodoListComponent  {
     title: ['', [Validators.required]],
     priority: ['medium' as TodoPriority],
   });
-  readonly priorityLabels = PRIORITY_LABELS;
 
   submitTask() {
     if (this.taskForm.invalid) {

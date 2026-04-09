@@ -30,10 +30,13 @@ describe('TodoListComponent', () => {
   it('should not submit when the form is invalid', () => {
     submitForm();
 
+    expect(component.taskForm.controls.title.touched).toBe(true);
     expect(getEmptyStateText()).toBe('No tasks yet');
   });
 
-  it('should show empty state when there are no tasks', () => {
+  it('should not add task when store rejects it (whitespace-only title)', () => {
+    addTaskThroughForm('   ', 'high');
+
     expect(getEmptyStateText()).toBe('No tasks yet');
   });
 

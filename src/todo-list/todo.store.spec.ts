@@ -44,11 +44,20 @@ describe('TodoStore', () => {
   });
 
   it('should toggle a task completion state', () => {
-    store.addTask('Toggle estado', 'low');
+    store.addTask('Toggle complete', 'low');
 
     store.toggleTask(1);
 
     expect(store.tasks()[0].completed).toBe(true);
+  });
+
+  it('should toggle a completed task back to incomplete', () => {
+    store.addTask('Toggle incomplete', 'low');
+    store.toggleTask(1);
+
+    store.toggleTask(1);
+
+    expect(store.tasks()[0].completed).toBe(false);
   });
 
   it('should delete a task by id', () => {
